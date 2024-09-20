@@ -70,11 +70,13 @@ const debouncedGetTotalCost = debounce(async () => {
   try {
     const response = await fetchTotalCost(vehiclePrice.value, vehicleType.value);
 
-    buyerFee.value = response.buyerFee;
-    sellerFee.value = response.sellerFee;
-    associationFee.value = response.associationFee;
-    storageFee.value = response.storageFee;
-    totalPrice.value = response.totalPrice;
+    ({
+      buyerFee: buyerFee.value,
+      sellerFee: sellerFee.value,
+      associationFee: associationFee.value,
+      storageFee: storageFee.value,
+      totalPrice: totalPrice.value,
+    } = response);
   } catch (error) {
     console.error('Error fetching total cost:', error);
   }
