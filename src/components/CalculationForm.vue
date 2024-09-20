@@ -20,13 +20,17 @@
             required
         >
           <option value="" disabled>Select type</option>
-          <option value="Common">Common</option>
-          <option value="Luxury">Luxury</option>
+          <option value="common">Common</option>
+          <option value="luxury">Luxury</option>
         </select>
       </div>
     </form>
 
-    <div v-if="totalPrice !== null" class="result">
+    <div v-if="totalPrice !== 0" class="result">
+      <p>Buyer Fee: {{ buyerFee }}</p>
+      <p>Seller Fee: {{ sellerFee }}</p>
+      <p>Association Fee: {{ associationFee }}</p>
+      <p>Storage Fee: {{ storageFee }}</p>
       <p>Total Price: {{ totalPrice }}</p>
     </div>
   </div>
@@ -37,37 +41,39 @@ import { ref, watch } from 'vue';
 
 const vehiclePrice = ref(0);
 const vehicleType = ref('common');
+const buyerFee = ref(null);
+const sellerFee = ref(null);
+const associationFee = ref(null);
+const storageFee = ref(null);
 const totalPrice = ref(null);
 
-const fetchTotalCost = async () => {
+import { fetchTotalCost } from '../services/api'
+
+const getTotalCost = async () => {
+  if (!vehiclePrice.value || vehiclePrice.value === 0) {
+    totalPrice.value = null;
+    buyerFee.value = null;
+    sellerFee.value = null;
+    associationFee.value = null;
+    storageFee.value = null;
+    return;
+  }
+
   try {
-    const token = 'q9WokQm3TJ7wcJhA3M78e23T2dmIRRJGIEHPoK0k4f7fde41';
+    const response = await fetchTotalCost(vehiclePrice.value, vehicleType.value);
 
-    const response = await fetch('http://localhost:9117/api/calculate-price', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`, // Replace with your actual token
-      },
-      body: JSON.stringify({
-        vehiclePrice: vehiclePrice.value,
-        vehicleType: vehicleType.value,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-
-    const data = await response.json();
-    totalPrice.value = data.totalPrice; // Update with the actual field from the response
+    buyerFee.value = response.buyerFee;
+    sellerFee.value = response.sellerFee;
+    associationFee.value = response.associationFee;
+    storageFee.value = response.storageFee;
+    totalPrice.value = response.totalPrice;
   } catch (error) {
-    console.error('There was a problem with the fetch operation:', error);
+    console.error('Error fetching total cost:', error);
   }
 };
 
 // Watch for changes in vehiclePrice or vehicleType and call fetchTotalCost
-watch([vehiclePrice, vehicleType], fetchTotalCost, { immediate: true });
+watch([vehiclePrice, vehicleType], getTotalCost, { immediate: true });
 </script>
 
 <style scoped>
