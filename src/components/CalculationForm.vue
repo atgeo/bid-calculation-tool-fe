@@ -26,12 +26,18 @@
       </div>
     </form>
 
-    <div v-if="totalPrice !== 0" class="result">
-      <p>Buyer Fee: {{ buyerFee }}</p>
-      <p>Seller Fee: {{ sellerFee }}</p>
-      <p>Association Fee: {{ associationFee }}</p>
-      <p>Storage Fee: {{ storageFee }}</p>
-      <p>Total Price: {{ totalPrice }}</p>
+    <div class="form-results">
+      <div v-if="totalPrice !== null" class="result">
+        <p>Buyer Fee: {{ buyerFee }}</p>
+        <p>Seller Fee: {{ sellerFee }}</p>
+        <p>Association Fee: {{ associationFee }}</p>
+        <p>Storage Fee: {{ storageFee }}</p>
+        <p>Total Price: {{ totalPrice }}</p>
+      </div>
+
+      <div v-else class="placeholder-message">
+        <p>Please enter a vehicle price to display fees and total price.</p>
+      </div>
     </div>
   </div>
 </template>
@@ -62,11 +68,11 @@ const getTotalCost = async () => {
   try {
     const response = await fetchTotalCost(vehiclePrice.value, vehicleType.value);
 
-    buyerFee.value = response.buyerFee;
-    sellerFee.value = response.sellerFee;
-    associationFee.value = response.associationFee;
-    storageFee.value = response.storageFee;
-    totalPrice.value = response.totalPrice;
+    buyerFee.value = response.buyerFee.toFixed(2);
+    sellerFee.value = response.sellerFee.toFixed(2);
+    associationFee.value = response.associationFee.toFixed(2);
+    storageFee.value = response.storageFee.toFixed(2);
+    totalPrice.value = response.totalPrice.toFixed(2);
   } catch (error) {
     console.error('Error fetching total cost:', error);
   }
@@ -101,5 +107,12 @@ button {
   padding: .7em 1.2em;
   font-size: 1em;
   cursor: pointer;
+}
+
+.form-results {
+  min-height: 10rem;
+  justify-content: flex-start;
+  display: flex;
+  align-items: center;
 }
 </style>
