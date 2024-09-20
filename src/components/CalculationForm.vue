@@ -1,6 +1,6 @@
 <template>
   <div class="vehicle-price-form">
-    <form @submit.prevent="handleSubmit">
+    <form>
       <div class="form-group">
         <label for="vehiclePrice">Vehicle Base Price</label>
         <input
