@@ -28,11 +28,11 @@
 
     <div class="form-results">
       <div v-if="totalPrice !== null" class="result">
-        <p>Buyer Fee: {{ buyerFee }}</p>
-        <p>Seller Fee: {{ sellerFee }}</p>
-        <p>Association Fee: {{ associationFee }}</p>
-        <p>Storage Fee: {{ storageFee }}</p>
-        <p>Total Price: {{ totalPrice }}</p>
+        <p>Buyer Fee: {{ buyerFee.toFixed(2) }}</p>
+        <p>Seller Fee: {{ sellerFee.toFixed(2) }}</p>
+        <p>Association Fee: {{ associationFee.toFixed(2) }}</p>
+        <p>Storage Fee: {{ storageFee.toFixed(2) }}</p>
+        <p>Total Price: {{ totalPrice.toFixed(2) }}</p>
       </div>
 
       <div v-else class="placeholder-message">
@@ -44,6 +44,7 @@
 
 <script setup>
 import { ref, watch } from 'vue';
+import { debounce } from 'lodash';
 
 const vehiclePrice = ref(0);
 const vehicleType = ref('common');
@@ -55,7 +56,7 @@ const totalPrice = ref(null);
 
 import { fetchTotalCost } from '../services/api'
 
-const getTotalCost = async () => {
+const debouncedGetTotalCost = debounce(async () => {
   if (!vehiclePrice.value || vehiclePrice.value === 0) {
     totalPrice.value = null;
     buyerFee.value = null;
@@ -65,21 +66,22 @@ const getTotalCost = async () => {
     return;
   }
 
+
   try {
     const response = await fetchTotalCost(vehiclePrice.value, vehicleType.value);
 
-    buyerFee.value = response.buyerFee.toFixed(2);
-    sellerFee.value = response.sellerFee.toFixed(2);
-    associationFee.value = response.associationFee.toFixed(2);
-    storageFee.value = response.storageFee.toFixed(2);
-    totalPrice.value = response.totalPrice.toFixed(2);
+    buyerFee.value = response.buyerFee;
+    sellerFee.value = response.sellerFee;
+    associationFee.value = response.associationFee;
+    storageFee.value = response.storageFee;
+    totalPrice.value = response.totalPrice;
   } catch (error) {
     console.error('Error fetching total cost:', error);
   }
-};
+}, 500);
 
 // Watch for changes in vehiclePrice or vehicleType and call fetchTotalCost
-watch([vehiclePrice, vehicleType], getTotalCost, { immediate: true });
+watch([vehiclePrice, vehicleType], debouncedGetTotalCost, { immediate: true });
 </script>
 
 <style scoped>
